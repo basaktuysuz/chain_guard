@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "563544549458",
+    "project_id": "chainguard-1654e",
+    "storage_bucket": "chainguard-1654e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:563544549458:android:6a9ce21b8ff35aa738d78b",
+        "android_client_info": {
+          "package_name": "com.example.chain_guard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBiiamRxm02BB9cEKumDSZEgKeayAJO0M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
