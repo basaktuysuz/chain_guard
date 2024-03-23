@@ -1,4 +1,5 @@
 import 'package:chain_guard/src/common_widgets/toast.dart';
+import 'package:chain_guard/src/features/authentication/screens/login/login_screen.dart';
 import 'package:chain_guard/src/features/avatarpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -135,8 +136,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     'Sign Out',
                     Icons.exit_to_app,
                     () {
-                      Navigator.of(context).pushNamed('/login');
-                      showToast(message: 'Logging out');
+                      FirebaseAuth.instance.signOut();
+                      runApp(
+                          new MaterialApp(
+                            home: new LoginScreen(),
+                          )
+
+                      );
                     },
                   ),
                 ],
@@ -165,52 +171,63 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  //getting user doc
   Future<void> _fetch() async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
     if (firebaseUser != null) {
-      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(firebaseUser.uid)
+          .where('email', isEqualTo: firebaseUser.email)
           .get();
 
-      setState(() {
-        // Check if 'URL' field exists and is not empty
-        url =  userSnapshot.get('URL');
-        role = userSnapshot.get('role');
-        idNumber = userSnapshot.get('id Number');
-        username = userSnapshot.get('fullname');
-        email = userSnapshot.get('email');
-        fullname = userSnapshot.get('fullname');
-        phoneNo = userSnapshot.get('phoneNo');
+      if (querySnapshot.docs.isNotEmpty) {
+        DocumentSnapshot userSnapshot = querySnapshot.docs.first;
 
-        usernameController.text = username;
-        emailController.text = email;
-        fullnameController.text = fullname;
-        phoneNoController.text = phoneNo;
-      });
+        setState(() {
+          // Check if 'URL' field exists and is not empty
+         url = userSnapshot.get('url');
+          role = userSnapshot.get('role');
+          idNumber = userSnapshot.get('id Number');
+          username = userSnapshot.get('fullname');
+          email = userSnapshot.get('email');
+          fullname = userSnapshot.get('fullname');
+          phoneNo = userSnapshot.get('phoneNo');
+
+          usernameController.text = username;
+          emailController.text = email;
+          fullnameController.text = fullname;
+          phoneNoController.text = phoneNo;
+        });
+      }
     }
   }
-
   _performSaveAction() async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
     if (firebaseUser != null) {
-      await FirebaseFirestore.instance
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(firebaseUser.uid)
-          .update({
-        'username': usernameController.text,
-        'email': emailController.text,
-        'fullname': fullnameController.text,
-        'phoneNo': phoneNoController.text,
-      });
+          .where('email', isEqualTo: firebaseUser.email)
+          .get();
 
-      setState(() {
-        username = usernameController.text;
-        email = emailController.text;
-        fullname = fullnameController.text;
-        phoneNo = phoneNoController.text;
-      });
+      if (querySnapshot.docs.isNotEmpty) {
+        // Get the reference to the document
+        DocumentReference docRef = querySnapshot.docs.first.reference;
+
+        // Update the document with new data
+        await docRef.update({
+          'url':url,
+          'email': emailController.text,
+          'fullname': fullnameController.text,
+          'phoneNo': phoneNoController.text,
+        });
+
+        setState(() {
+          // Update UI with new data
+          username = usernameController.text;
+          email = emailController.text;
+          fullname = fullnameController.text;
+          phoneNo = phoneNoController.text;
+        });
+      }
     }
   }
 
@@ -263,6 +280,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void updateImage(String imageUrl) {
     setState(() {
       url = imageUrl;
+      _performSaveAction();
     });
   }
 

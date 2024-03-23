@@ -22,14 +22,23 @@ class _HomePageState extends State<HomePage> {
   Future<void> _fetchUserInfo() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
-      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
+      try {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .where('email', isEqualTo: currentUser.email)
+            .get();
 
-      setState(() {
-        fullName = userSnapshot['fullname'];
-      });
+        if (querySnapshot.docs.isNotEmpty) {
+          DocumentSnapshot userSnapshot = querySnapshot.docs.first;
+          setState(() {
+            fullName = userSnapshot['fullname'];
+          });
+        } else {
+          print('Kullanıcı verisi bulunamadı');
+        }
+      } catch (error) {
+        print('Veri çekerken hata oluştu: $error');
+      }
     }
   }
 

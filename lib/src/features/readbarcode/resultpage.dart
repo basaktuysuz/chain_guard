@@ -49,7 +49,7 @@ class ResultPage extends StatelessWidget {
 
 
   void _sendLinktoFirebase(String url) async {
-    String? userId = await getUserId(); // Kullanıcı kimliğini al
+    String? userId = await getCurrentUserKey(); // Kullanıcı kimliğini al
     if (userId != null) {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -68,7 +68,7 @@ class ResultPage extends StatelessWidget {
       print("No user logged in.");
     }
   }
-
+/*
   Future<String?> getUserId() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -79,11 +79,28 @@ class ResultPage extends StatelessWidget {
     }
   }
 
+ */
+
   _launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  Future<String?> getCurrentUserKey() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: user.email)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.id;
+      }
+    }
+    return null;
   }
 }

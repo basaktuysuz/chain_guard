@@ -53,6 +53,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     CollectionReference collection = firestore.collection(collectionName);
 
     collection.doc(_idController.text).set({
+      'url':'https://www.pngarts.com/files/11/Avatar-Free-PNG-Image.png',
       'fullname': _nameController.text,
       'email': _emailController.text,
       'phoneNo': _phoneNoController.text,
@@ -61,7 +62,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'role': _selectedValue,
     }).then((value) {
       // If data storage is successful, navigate to the next screen or perform any other actions
-      showToast(message: "User is successfully created");
+      showToast(message: "User is successfully created \n Use login page to log in");
       print("User data stored successfully");
     }).catchError((error) {
       // Handle any errors that occur during data storage
