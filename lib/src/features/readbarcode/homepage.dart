@@ -1,4 +1,5 @@
 
+import 'package:chain_guard/src/common_widgets/toast.dart';
 import 'package:chain_guard/src/features/profilepage.dart';
 import 'package:chain_guard/src/features/readbarcode/resultpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -42,15 +43,35 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void scanQrCode() {
+  Future<void> scanQrCode() async {
+
+
     FlutterBarcodeScanner.scanBarcode("#000000", "Cancel", true, ScanMode.QR)
         .then((value) {
       if (value != '-1') {
         // QR code scanned successfully, handle the content here
         setState(() {
-          this.data = value;
+          data = value;
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (BuildContext context) {
+              return Padding(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom),
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.4, // Set the height to 50% of screen height
+                  child: ResultPage(data),
+                ),
+              );
+            },
+          );
         });
         print("QR Code Content: $value");
+
+
+
+
         // You can do further processing with the QR code content here
       } else {
         // User canceled the scan
@@ -148,17 +169,9 @@ class _HomePageState extends State<HomePage> {
                         width: 200,
                         child: ElevatedButton(
                           onPressed: () async {
-                            String scannedData =
-                                await FlutterBarcodeScanner.scanBarcode(
-                                    "#000000", "Cancel", true, ScanMode.QR);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ResultPage(
-                                      scannedData)), // Pass scanned data to result page
-                            );
 
-                            //  scanQrCode();
+
+                           scanQrCode();
                             /*      var res = await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -197,14 +210,7 @@ class _HomePageState extends State<HomePage> {
             ),
             InkWell(
               onTap: () async {
-                String scannedData = await FlutterBarcodeScanner.scanBarcode(
-                    "#000000", "Cancel", true, ScanMode.QR);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ResultPage(
-                          scannedData)), // Pass scanned data to result page
-                );
+                scanQrCode();
                 /*      var res = await Navigator.push(
                     context,
                     MaterialPageRoute(

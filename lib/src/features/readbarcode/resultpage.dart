@@ -1,3 +1,4 @@
+import 'package:chain_guard/src/common_widgets/toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,43 +11,89 @@ class ResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Parse the URL to extract Box, Content, and Weight values
+    Map<String, String> parsedValues = parseUrl(scannedData);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('QR Code Result'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Scanned QR Code Data:',
-              style: TextStyle(fontSize: 20),
-            ),
-            SizedBox(height: 10),
-            Text(
-              scannedData,
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 20),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _sendLinktoFirebase(scannedData);
-              },
-              child: Text('Receive Box'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _launchURL(scannedData);
-              },
-              child: Text('Open Link'),
-            ),
-          ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0,vertical:30.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+
+              const Text(
+                'Scanned QR Code Data:',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+              /*   Text(
+                scannedData,
+                style: TextStyle(fontSize: 18),
+              ),
+
+            */
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Container(
+                  width: double.infinity,
+                  // Set Card width to match parent width
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Box: ${parsedValues['Box']}',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Content: ${parsedValues['Content']}',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Weight: ${parsedValues['Weight']}',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _sendLinktoFirebase(scannedData);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.green,
+                    onPrimary: Colors.white,
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    'Receive Box',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-
 
   void _sendLinktoFirebase(String url) async {
     String? userId = await getCurrentUserKey(); // Kullanıcı kimliğini al
@@ -56,11 +103,18 @@ class ResultPage extends StatelessWidget {
       CollectionReference usersCollection = firestore.collection("users");
       DocumentReference userRef = usersCollection.doc(userId);
 
+      // Parse the URL to extract Box, Content, and Weight values
+      Map<String, String> parsedValues = parseUrl(url);
+
       userRef.collection('boxes').add({
         'link': url,
         'timestamp': FieldValue.serverTimestamp(),
+        'Box': parsedValues['Box'],
+        'Content': parsedValues['Content'],
+        'Weight': parsedValues['Weight'],
       }).then((value) {
         print("Link stored successfully in user's boxes collection");
+        showToast(message: "Link stored successfully in user's boxes collection");
       }).catchError((error) {
         print("Error occurred during data storage: $error");
       });
@@ -68,6 +122,22 @@ class ResultPage extends StatelessWidget {
       print("No user logged in.");
     }
   }
+
+  Map<String, String> parseUrl(String url) {
+    RegExp regExp = RegExp(r"/box/(\w+)/content/(\w+)/weight/(\d+)");
+    Match? match = regExp.firstMatch(url);
+
+    if (match != null) {
+      return {
+        'Box': match.group(1)!,
+        'Content': match.group(2)!,
+        'Weight': match.group(3)!
+      };
+    } else {
+      return {};
+    }
+  }
+
 /*
   Future<String?> getUserId() async {
     User? user = FirebaseAuth.instance.currentUser;
