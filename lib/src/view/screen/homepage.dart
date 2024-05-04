@@ -1,12 +1,12 @@
-
-import 'package:chain_guard/src/common_widgets/toast.dart';
-import 'package:chain_guard/src/features/profilepage.dart';
-import 'package:chain_guard/src/features/readbarcode/resultpage.dart';
+import 'package:chain_guard/src/db_helper/constant.dart';
+import 'package:chain_guard/src/view/screen/profilepage.dart';
+import 'package:chain_guard/src/view/screen/resultpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:mongo_dart/mongo_dart.dart' as M;
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String fullName = '';
+  String fullName = 'Başak';
   String result = "";
   String data = "";
 
@@ -29,10 +29,24 @@ class _HomePageState extends State<HomePage> {
             .where('email', isEqualTo: currentUser.email)
             .get();
 
+
+        var db = await M.Db.create(MONGO_CONNECTION_URL);
+        await db.open();
+        final collection = db.collection('users');
+        final query = M.where.eq('email', currentUser.email);
+        final result = await collection.find(query).toList();
+        if (result.isNotEmpty) {
+          final user = result.first;
+          final fullname = user['fullname'];
+          debugPrint('Fullname: '+fullname);
+        } else {
+          print('User not found.');
+        }
+
         if (querySnapshot.docs.isNotEmpty) {
           DocumentSnapshot userSnapshot = querySnapshot.docs.first;
           setState(() {
-            fullName = userSnapshot['fullname'];
+            fullName = userSnapshot['fullname'] as String;
           });
         } else {
           print('Kullanıcı verisi bulunamadı');
@@ -113,7 +127,7 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Welcome $fullName !',
+              'Welcome !',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 21),
             ),
             const SizedBox(
@@ -124,7 +138,7 @@ class _HomePageState extends State<HomePage> {
               shadowColor: Colors.black,
               color: Colors.blue[100],
               child: SizedBox(
-                height: 200,
+                height: 210,
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(

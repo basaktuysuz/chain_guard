@@ -1,9 +1,12 @@
 import 'package:chain_guard/src/Firebase/auth.dart';
 import 'package:chain_guard/src/common_widgets/toast.dart';
-import 'package:chain_guard/src/features/authentication/screens/signup/signup_screen.dart';
-import 'package:chain_guard/src/features/readbarcode/homepage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:chain_guard/src/db_helper/constant.dart';
+import 'package:chain_guard/src/db_helper/mongo_crud.dart';
+import 'package:chain_guard/src/view/screen/homepage.dart';
+import 'package:chain_guard/src/view/screen/signup_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:mongo_dart/mongo_dart.dart' as M;
+import 'package:realm/realm.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -20,8 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passKey = GlobalKey<FormState>();
   final Auth _auth = Auth();
   bool _isSigning = false;
+  MongoDbCrud mongoDbCrud = MongoDbCrud();
 
-
+  //List<dynamic>? userList;
 
   void _signIn() async {
     setState(() {
@@ -31,25 +35,86 @@ class _LoginScreenState extends State<LoginScreen> {
     String email = _emailController.text;
     String password = _passwordController.text;
 
-    User? user = await _auth.signInWithEmailAndPassword(email, password);
+    //User? user = await _auth.signInWithEmailAndPassword(email, password);
 
     setState(() {
       _isSigning = false;
     });
-
-    if (user != null) {
+    _loginUser(email, password);
+    /*if (user != null) {
       showToast(message: "User is successfully signed in");
       Navigator.push(
         context,
-        MaterialPageRoute(
-            builder: (context) => const HomePage()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } else {
       showToast(message: "some error occured");
     }
+
+     */
   }
 
+  /*  Future<bool> loginUser(String email, String password) async {
+    var db = await M.Db.create(MONGO_CONNECTION_URL); // Assuming you have connection logic
+    await db.open();
+    final app = App(AppConfiguration('application-0-hzldcca'));
+    final user = await app.logIn(Credentials.anonymous());
+    var userCollection = db.collection('users');
+    var user = await userCollection.findOne({'email': email}); // Find user by email
 
+    if (user == null) {
+      showToast(message: "hata");
+      return false;
+
+      // User not found
+    }else  Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomePage()),
+    );
+
+    var hashedPassword = password; // Hash entered password
+    return hashedPassword == user['password']; // Compare hashed passwords
+  }
+
+   */
+
+  Future<void> _loginUser(email, password) async {
+    final app = App(AppConfiguration('application-0-hzldcca'));
+
+    var db = await M.Db.create(MONGO_CONNECTION_URL);
+    await db.open();
+
+    final user = await app.logIn(Credentials.emailPassword(email, password));
+
+    //  var user = await userCollection.findOne({'email': email});  // Find user by email
+
+    /* var userCollection = db.collection('users');
+    // Check if there's a user with the provided email
+    bool emailExists = userList.any((user) => user.email == email);
+
+    if () {
+      showToast(message: "Email does not exist");
+      return; // Exit the function early if the email doesn't exist
+    }
+
+   // Check if there's a user with the provided email and password
+    UserModel user = userList.firstWhere(
+          (user) => user.email == email && user.password == password,
+      orElse: () => null,
+    );
+
+
+   */
+    if (user != null) {
+      showToast(message: "User is successfully signed in");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } else {
+      showToast(message: "Incorrect password");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,8 +171,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           decoration: const InputDecoration(
                               label: Text("Email"),
                               border: OutlineInputBorder(),
-                              prefixIcon:
-                                  Icon(Icons.email_rounded, color: Colors.orange),
+                              prefixIcon: Icon(Icons.email_rounded,
+                                  color: Colors.orange),
                               labelStyle: TextStyle(color: Color(0xFF001BFF)),
                               focusedBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
@@ -136,7 +201,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             border: const OutlineInputBorder(),
                             prefixIcon: const Icon(Icons.fingerprint_rounded,
                                 color: Colors.orange),
-                            labelStyle: const TextStyle(color: Color(0xFF001BFF)),
+                            labelStyle:
+                                const TextStyle(color: Color(0xFF001BFF)),
                             suffixIcon: IconButton(
                                 icon: Icon(
                                   passwordVisible
@@ -167,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onTap: () {
                         if (_formKey.currentState!.validate() &&
                             _passKey.currentState!.validate()) {
-                         _signIn();
+                          _signIn();
                         }
                       },
                       child: Container(

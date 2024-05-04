@@ -16,7 +16,7 @@ class ResultPage extends StatelessWidget {
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0,vertical:30.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10.0,vertical:10.0),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -35,6 +35,7 @@ class ResultPage extends StatelessWidget {
 
             */
               Card(
+
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -43,14 +44,19 @@ class ResultPage extends StatelessWidget {
                   width: double.infinity,
                   // Set Card width to match parent width
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(10.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Box: ${parsedValues['Box']}',
+                          'Box Id: ${parsedValues['Box']}',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Destination: ${parsedValues['Destination']}',
+                          style: TextStyle(fontSize: 18),
                         ),
                         SizedBox(height: 10),
                         Text(
@@ -61,13 +67,14 @@ class ResultPage extends StatelessWidget {
                         Text(
                           'Weight: ${parsedValues['Weight']}',
                           style: TextStyle(fontSize: 18),
-                        ),
+                        ),    SizedBox(height: 10),
+
                       ],
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               Container(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -75,9 +82,8 @@ class ResultPage extends StatelessWidget {
                     _sendLinktoFirebase(scannedData);
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.green,
-                    onPrimary: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                    foregroundColor: Colors.white, backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -124,14 +130,15 @@ class ResultPage extends StatelessWidget {
   }
 
   Map<String, String> parseUrl(String url) {
-    RegExp regExp = RegExp(r"/box/(\w+)/content/(\w+)/weight/(\d+)");
+    RegExp regExp = RegExp(r"/box/(\w+)/destination/(\w+)/content/(\w+)/weight/(\d+)");
     Match? match = regExp.firstMatch(url);
 
     if (match != null) {
       return {
         'Box': match.group(1)!,
-        'Content': match.group(2)!,
-        'Weight': match.group(3)!
+        'Destination': match.group(2)!,
+        'Content': match.group(3)!,
+        'Weight': match.group(4)!
       };
     } else {
       return {};

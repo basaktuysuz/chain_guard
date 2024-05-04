@@ -1,11 +1,16 @@
 import 'package:chain_guard/src/common_widgets/toast.dart';
-import 'package:chain_guard/src/features/authentication/screens/login/login_screen.dart';
-import 'package:chain_guard/src/features/avatarpage.dart';
+import 'package:chain_guard/src/view/model/user_model.dart';
+import 'package:chain_guard/src/view/screen/login_screen.dart';
+import 'package:chain_guard/src/view/screen/avatarpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mongo_dart/mongo_dart.dart' as M;
+import 'package:realm/realm.dart';
+
+import '../../db_helper/constant.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +46,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     //getting user info with _fetch method
-    _fetch();
+ //   _fetch();
   }
 
   @override
@@ -170,8 +175,35 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
+/*
   Future<void> _fetch() async {
+    //Çalışmıyor
+    final app = App(AppConfiguration('application-0-hzldcca'));
+
+    //final user = await app.logIn(Credentials.emailPassword(email, password));
+    var db = await M.Db.create(MONGO_CONNECTION_URL);
+    await db.open();
+    final collection = db.collection('users');
+   // final query = M.where.eq('email', currentUser.email);
+    final result = await collection.find(query).toList();
+    if (result.isNotEmpty) {
+      final user = result.first;
+      final fullname = user['fullname'];
+      debugPrint('Fullname: '+fullname);
+    } else {
+      print('User not found.');
+    }
+    final user1 = await app.currentUser?.id;
+    debugPrint("AAAAAA"+user1!);
+    if(user1!=null){
+
+
+    }
+
+
+
+
+/*
     final firebaseUser = FirebaseAuth.instance.currentUser;
     if (firebaseUser != null) {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -199,7 +231,11 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       }
     }
+
+ */
   }
+
+ */
   _performSaveAction() async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
     if (firebaseUser != null) {

@@ -1,10 +1,13 @@
-import 'package:chain_guard/src/features/authentication/screens/login/login_screen.dart';
+import 'package:chain_guard/src/view/screen/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:realm/realm.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+
   runApp(const MyApp());
 }
 
