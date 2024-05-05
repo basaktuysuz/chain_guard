@@ -20,7 +20,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.18.6 <3.0.0'
+  sdk: '>=2.18.6 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -53,6 +53,8 @@ dependencies:
   mongo_dart: ^0.10.2
   realm: ^2.1.0
   shelf_router: ^1.1.2
+  dart_ipify: ^1.1.1
+
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +85,9 @@ flutter:
   assets:
     - assets/images/recommended.png
     - assets/images/bc_ic.png
+    - assets/images/scan_code.png
+    - assets/images/report_issue.png
+    - assets/images/packages.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

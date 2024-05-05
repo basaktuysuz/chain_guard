@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:chain_guard/src/Firebase/auth.dart';
-import 'package:chain_guard/src/common_widgets/toast.dart';
 import 'package:chain_guard/src/db_helper/constant.dart';
 import 'package:chain_guard/src/db_helper/mongo_crud.dart';
+import 'package:chain_guard/src/view/screen/avatarpage.dart';
+import 'package:chain_guard/src/view/screen/driver_homepage.dart';
 import 'package:chain_guard/src/view/screen/homepage.dart';
 import 'package:chain_guard/src/view/screen/signup_screen.dart';
+import 'package:dart_ipify/dart_ipify.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:mongo_dart/mongo_dart.dart' as M;
 import 'package:realm/realm.dart';
 
@@ -22,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _passKey = GlobalKey<FormState>();
   final Auth _auth = Auth();
+  String _selectedValue = 'User';
   bool _isSigning = false;
   MongoDbCrud mongoDbCrud = MongoDbCrud();
 
@@ -40,6 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _isSigning = false;
     });
+    fetchData();
     _loginUser(email, password);
     /*if (user != null) {
       showToast(message: "User is successfully signed in");
@@ -52,6 +59,29 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
      */
+  }
+
+
+  Future<void> fetchData() async {
+    final String ip = await getIp();
+    print("asdasdasdasdsa");
+    final response = await http.get(Uri.parse('http://$ip:3000/v1'));
+
+    if (response.statusCode == 200) {
+      // Başarılı yanıt
+      final data = jsonDecode(response.body);
+      debugPrint(data['message']); // "Hello from Node.js!" yazdırmalı
+    } else {
+      // Hata işleme
+     print('İstek başarısız oldu, durum: ${response.statusCode}.');
+    }
+  }
+
+
+  Future<String> getIp() async {
+    final ipv4 = await Ipify.ipv4();
+    print(ipv4);
+    return ipv4;
   }
 
   /*  Future<bool> loginUser(String email, String password) async {
@@ -104,18 +134,43 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
 
-   */
     if (user != null) {
       showToast(message: "User is successfully signed in");
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
+
     } else {
       showToast(message: "Incorrect password");
+    }  */
+
+
+    String collectionName = _getCollectionName();
+
+    if (collectionName == 'drivers') {
+      // Redirect to driver home page
+      Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => DriverHomePage()) ,);
+    } else {
+      // if users enters go to user home page
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomePage()) );
     }
   }
+  String _getCollectionName() {
+    String dropdownValue = '';
 
+    // Get the selected value from the dropdown
+    setState(() {
+      dropdownValue = _selectedValue; // Admin mi user mı driver mı
+    });
+
+    // Determine the collection name based on the selected dropdown value
+    String collectionName = 'defaultCollection'; // Default collection name
+
+    if (dropdownValue == 'User' ) {
+      collectionName = 'users'; // Collection name for users
+    } else if (dropdownValue == 'Driver') {
+      collectionName = 'drivers'; // Collection name for admins
+    }
+
+    return collectionName;
+  }
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -153,6 +208,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(
                       height: size.height * 0.02,
                     ),
+                    DropdownButtonFormField<String>(
+                      value: 'User',
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedValue = newValue ?? 'User';
+                        });
+                      },
+                      items: <String>['User', 'Driver']
+                          .map<DropdownMenuItem<String>>(
+                            (String value) =>
+                            DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            ),
+                      )
+                          .toList(),
+                    ),
+                    const SizedBox(height: 10.0),
                     Form(
                       key: _formKey,
                       child: TextFormField(

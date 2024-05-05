@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> scanQrCode() async {
+ Future<void> scanQrCode() async {
 
 
     FlutterBarcodeScanner.scanBarcode("#000000", "Cancel", true, ScanMode.QR)
