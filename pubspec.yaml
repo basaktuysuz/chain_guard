@@ -54,6 +54,8 @@ dependencies:
   realm: ^2.1.0
   shelf_router: ^1.1.2
   dart_ipify: ^1.1.1
+  dio: ^5.4.3+1
+  http: ^1.2.1
 
 
 dev_dependencies:

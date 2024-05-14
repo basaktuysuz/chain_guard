@@ -1,9 +1,13 @@
+import 'dart:convert';
+
+import 'package:chain_guard/src/db_helper/authservice.dart';
 import 'package:chain_guard/src/db_helper/constant.dart';
 import 'package:chain_guard/src/view/screen/profilepage.dart';
 import 'package:chain_guard/src/view/screen/resultpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:mongo_dart/mongo_dart.dart' as M;
@@ -19,9 +23,32 @@ class _HomePageState extends State<HomePage> {
   String fullName = 'Başak';
   String result = "";
   String data = "";
+  var token;
+  List<dynamic> users = [];
+  dynamic firstUser;
+
+  Future<void> fetchUsers() async {
+    try {
+      final response = await http.get(Uri.parse("https://chainguard-api.onrender.com/getusers"));
+      if (response.statusCode == 200) {
+        setState(() {
+          users = json.decode(response.body);
+          print(users);
+          // İlk kullanıcıyı almak için veri dizisinin ilk öğesini seçin
+
+        });
+      } else {
+        print("Failed to load users: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error fetching users: $e");
+    }
+  }
 
   Future<void> _fetchUserInfo() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
+    fetchUsers();
+
+  /*  final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       try {
         QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -54,48 +81,50 @@ class _HomePageState extends State<HomePage> {
       } catch (error) {
         print('Veri çekerken hata oluştu: $error');
       }
-    }
+    }*/
   }
+
+
 
  Future<void> scanQrCode() async {
 
 
-    FlutterBarcodeScanner.scanBarcode("#000000", "Cancel", true, ScanMode.QR)
-        .then((value) {
-      if (value != '-1') {
-        // QR code scanned successfully, handle the content here
-        setState(() {
-          data = value;
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (BuildContext context) {
-              return Padding(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom),
-                child: Container(
-                  height: MediaQuery.of(context).size.height * 0.4, // Set the height to 50% of screen height
-                  child: ResultPage(data),
-                ),
-              );
-            },
-          );
-        });
-        print("QR Code Content: $value");
+   FlutterBarcodeScanner.scanBarcode("#000000", "Cancel", true, ScanMode.QR)
+       .then((value) {
+     if (value != '-1') {
+       // QR code scanned successfully
+       if (value.startsWith('https://chainguard.com')) {
+         setState(() {
+           data = value;
+           showModalBottomSheet(
+             context: context,
+             isScrollControlled: true,
+             builder: (BuildContext context) {
+               return Padding(
+                 padding: EdgeInsets.only(
+                     bottom: MediaQuery.of(context).viewInsets.bottom),
+                 child: Container(
+                   height: MediaQuery.of(context).size.height * 0.4, // Set the height to 50% of screen height
+                   child: ResultPage(data),
+                 ),
+               );
+             },
+           );
+         });
+         print("QR Code Content: $value");
+       } else {
+         print("QR code does not start with 'https://www.chainguard.com'");
+       }
+     } else {
+       // User canceled the scan
+       print("Scan canceled");
+     }
+   }).catchError((error) {
+     // Handle error if any
+     print("Error while scanning QR code: $error");
+   });
 
-
-
-
-        // You can do further processing with the QR code content here
-      } else {
-        // User canceled the scan
-        print("Scan canceled");
-      }
-    }).catchError((error) {
-      // Handle error if any
-      print("Error while scanning QR code: $error");
-    });
-  }
+ }
 
   @override
   void initState() {
@@ -107,7 +136,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("HomePage"),
+        title: const Text("ChainGuard"),
         actions: [
           IconButton(
             icon: Icon(Icons.person),
@@ -148,6 +177,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
+
                         children: [
                           Icon(
                             Icons.qr_code_scanner_outlined,
@@ -173,8 +203,10 @@ class _HomePageState extends State<HomePage> {
                         'This feature will allow you to receive packages and many more. ',
                         style: TextStyle(
                           fontSize: 15,
+
                           color: Colors.green,
-                        ), //Textstyle
+                        ),
+                        textAlign: TextAlign.center,//Textstyle
                       ), //Text
                       const SizedBox(
                         height: 10,
@@ -183,7 +215,6 @@ class _HomePageState extends State<HomePage> {
                         width: 200,
                         child: ElevatedButton(
                           onPressed: () async {
-
 
                            scanQrCode();
                             /*      var res = await Navigator.push(
@@ -200,9 +231,9 @@ class _HomePageState extends State<HomePage> {
            */
                           },
                           style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all(Colors.green)),
-                          child: Padding(
+                            backgroundColor: MaterialStateProperty.all(Colors.green),
+                            foregroundColor: MaterialStateProperty.all(Colors.white),),
+                            child: Padding(
                             padding: const EdgeInsets.all(4),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,

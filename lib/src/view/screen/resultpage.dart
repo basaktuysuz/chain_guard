@@ -49,18 +49,20 @@ class ResultPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Box Id: ${parsedValues['Box']}',
+                          'Box size: ${parsedValues['Box']}',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 10),
-                        Text(
-                          'Destination: ${parsedValues['Destination']}',
-                          style: TextStyle(fontSize: 18),
-                        ),
+
                         SizedBox(height: 10),
                         Text(
                           'Content: ${parsedValues['Content']}',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        SizedBox(height: 10),
+
+                        Text(
+                          'Type: ${parsedValues['Destination']}',
                           style: TextStyle(fontSize: 18),
                         ),
                         SizedBox(height: 10),
@@ -130,7 +132,7 @@ class ResultPage extends StatelessWidget {
   }
 
   Map<String, String> parseUrl(String url) {
-    RegExp regExp = RegExp(r"/box/(\w+)/destination/(\w+)/content/(\w+)/weight/(\d+)");
+    RegExp regExp = RegExp(r"/box/(\w+)/comment/(\w+)/content/(\w+)/weight/(\d+)");
     Match? match = regExp.firstMatch(url);
 
     if (match != null) {
