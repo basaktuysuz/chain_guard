@@ -1,5 +1,5 @@
-import 'package:chain_guard/src/Firebase/auth.dart';
 import 'package:chain_guard/src/common_widgets/toast.dart';
+import 'package:chain_guard/src/db_helper/authservice.dart';
 import 'package:chain_guard/src/db_helper/constant.dart';
 import 'package:chain_guard/src/db_helper/mongo_crud.dart';
 import 'package:chain_guard/src/view/model/user_model.dart';
@@ -24,13 +24,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneNoController = TextEditingController();
+
   String _selectedValue = 'User';
   MongoDbCrud mongoDbCrud = MongoDbCrud();
   List<dynamic>? userList;
   final _formKey = GlobalKey<FormState>();
 
   bool passwordVisible = false;
-  final Auth _authService = Auth();
+
   final _userNameKey = GlobalKey<FormState>();
   final _emailKey = GlobalKey<FormState>();
   final _passKey_1 = GlobalKey<FormState>();
@@ -47,8 +48,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           _emailController.text,
           _passwordController.text);
     /*  UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
+
       );
 
      */
@@ -61,16 +61,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       // Handle any errors that occur during user creation
       print("Error occurred during user creation: $e");
     }
+*/
 
- */
-    final app = App(AppConfiguration('application-0-hzldcca'));
+  String collectionName = _getCollectionName();
+  print(collectionName);
+    AuthService().addUser(_emailController.text, _passwordController.text,_nameController.text,_phoneNoController.text ,collectionName.toString(),_idController.text);
 
-    var db = await M.Db.create(MONGO_CONNECTION_URL);
-    await db.open();
-    EmailPasswordAuthProvider authProvider = EmailPasswordAuthProvider(app);
-    await authProvider.registerUser( _emailController.text,  _passwordController.text);
 
-    _storeUserData();
+   // _storeUserData();
   }
 
   Future<void> _storeUserData() async {
@@ -213,7 +211,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               _selectedValue = newValue ?? 'User';
                             });
                           },
-                          items: <String>['User', 'Admin', 'Driver']
+                          items: <String>['User', 'Driver']
                               .map<DropdownMenuItem<String>>(
                                 (String value) =>
                                 DropdownMenuItem<String>(

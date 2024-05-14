@@ -1,15 +1,8 @@
-import 'dart:convert';
-
-import 'package:chain_guard/src/Firebase/auth.dart';
+import 'package:chain_guard/src/db_helper/authservice.dart';
 import 'package:chain_guard/src/db_helper/constant.dart';
 import 'package:chain_guard/src/db_helper/mongo_crud.dart';
-import 'package:chain_guard/src/view/screen/avatarpage.dart';
-import 'package:chain_guard/src/view/screen/driver_homepage.dart';
-import 'package:chain_guard/src/view/screen/homepage.dart';
 import 'package:chain_guard/src/view/screen/signup_screen.dart';
-import 'package:dart_ipify/dart_ipify.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:mongo_dart/mongo_dart.dart' as M;
 import 'package:realm/realm.dart';
 
@@ -24,30 +17,42 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool passwordVisible = false;
+
   final _formKey = GlobalKey<FormState>();
   final _passKey = GlobalKey<FormState>();
-  final Auth _auth = Auth();
+
   String _selectedValue = 'User';
   bool _isSigning = false;
   MongoDbCrud mongoDbCrud = MongoDbCrud();
+  String _responseMessage = '';
 
   //List<dynamic>? userList;
 
   void _signIn() async {
-    setState(() {
-      _isSigning = true;
-    });
-
     String email = _emailController.text;
     String password = _passwordController.text;
-
-    //User? user = await _auth.signInWithEmailAndPassword(email, password);
 
     setState(() {
       _isSigning = false;
     });
-    fetchData();
-    _loginUser(email, password);
+    // fetchData();
+    bool isLoginSuccessful = false;
+
+    final app = App(AppConfiguration('application-0-hzldcca'));
+
+    var db = await M.Db.create(MONGO_CONNECTION_URL);
+    await db.open();
+
+    var userCollection = db.collection('users');
+
+    String collectionName = _getCollectionName();
+    print("object");
+    print(app.currentUser?.id);
+    app.currentUser?.id;
+    var currentUser = await userCollection.findOne({'email': email});
+    AuthService().login(context, email, password, collectionName);
+
+    //_loginUser(email, password);
     /*if (user != null) {
       showToast(message: "User is successfully signed in");
       Navigator.push(
@@ -59,29 +64,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
      */
-  }
-
-
-  Future<void> fetchData() async {
-    final String ip = await getIp();
-    print("asdasdasdasdsa");
-    final response = await http.get(Uri.parse('http://$ip:3000/v1'));
-
-    if (response.statusCode == 200) {
-      // Başarılı yanıt
-      final data = jsonDecode(response.body);
-      debugPrint(data['message']); // "Hello from Node.js!" yazdırmalı
-    } else {
-      // Hata işleme
-     print('İstek başarısız oldu, durum: ${response.statusCode}.');
-    }
-  }
-
-
-  Future<String> getIp() async {
-    final ipv4 = await Ipify.ipv4();
-    print(ipv4);
-    return ipv4;
   }
 
   /*  Future<bool> loginUser(String email, String password) async {
@@ -109,16 +91,16 @@ class _LoginScreenState extends State<LoginScreen> {
    */
 
   Future<void> _loginUser(email, password) async {
-    final app = App(AppConfiguration('application-0-hzldcca'));
+    /*  final app = App(AppConfiguration('application-0-hzldcca'));
 
     var db = await M.Db.create(MONGO_CONNECTION_URL);
     await db.open();
 
     final user = await app.logIn(Credentials.emailPassword(email, password));
+    var userCollection = db.collection('users');
+     var user = await userCollection.findOne({'email': email});  // Find user by email
 
-    //  var user = await userCollection.findOne({'email': email});  // Find user by email
 
-    /* var userCollection = db.collection('users');
     // Check if there's a user with the provided email
     bool emailExists = userList.any((user) => user.email == email);
 
@@ -141,29 +123,16 @@ class _LoginScreenState extends State<LoginScreen> {
       showToast(message: "Incorrect password");
     }  */
 
-
     String collectionName = _getCollectionName();
-
-    if (collectionName == 'drivers') {
-      // Redirect to driver home page
-      Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => DriverHomePage()) ,);
-    } else {
-      // if users enters go to user home page
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomePage()) );
-    }
   }
+
   String _getCollectionName() {
     String dropdownValue = '';
-
-    // Get the selected value from the dropdown
-    setState(() {
-      dropdownValue = _selectedValue; // Admin mi user mı driver mı
-    });
 
     // Determine the collection name based on the selected dropdown value
     String collectionName = 'defaultCollection'; // Default collection name
 
-    if (dropdownValue == 'User' ) {
+    if (dropdownValue == 'User') {
       collectionName = 'users'; // Collection name for users
     } else if (dropdownValue == 'Driver') {
       collectionName = 'drivers'; // Collection name for admins
@@ -171,6 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return collectionName;
   }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -217,12 +187,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       items: <String>['User', 'Driver']
                           .map<DropdownMenuItem<String>>(
-                            (String value) =>
-                            DropdownMenuItem<String>(
+                            (String value) => DropdownMenuItem<String>(
                               value: value,
                               child: Text(value),
                             ),
-                      )
+                          )
                           .toList(),
                     ),
                     const SizedBox(height: 10.0),
