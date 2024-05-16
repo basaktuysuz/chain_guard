@@ -27,13 +27,13 @@ Dio dio = new Dio();
 
       if (response.statusCode == 200) {
 
-        if (collectionName == 'drivers') {
+        if (collectionName == 'Driver') {
           // Redirect to driver home page
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => DriverHomePage()),
           );
-        } else {
+        } else if  (collectionName == 'User'){
           // if users enters go to user home page
           Navigator.pushReplacement(
             context,

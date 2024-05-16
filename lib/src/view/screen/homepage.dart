@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:chain_guard/src/common_widgets/toast.dart';
 import 'package:chain_guard/src/db_helper/authservice.dart';
 import 'package:chain_guard/src/db_helper/constant.dart';
+import 'package:chain_guard/src/view/screen/login_screen.dart';
 import 'package:chain_guard/src/view/screen/profilepage.dart';
 import 'package:chain_guard/src/view/screen/resultpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -333,8 +335,26 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.grey,
                     ),
                   ),
+
                 ],
+
               ),
+
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    showToast(message: "Logging Out");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                    );
+                  },
+                  child: Text('Log Out'),
+                ),
+              ],
             ),
           ],
         ),

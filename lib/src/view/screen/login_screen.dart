@@ -46,8 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
     var userCollection = db.collection('users');
 
     String collectionName = _getCollectionName();
-    print("object");
-    print(app.currentUser?.id);
+    print(collectionName);
+
     app.currentUser?.id;
     var currentUser = await userCollection.findOne({'email': email});
     AuthService().login(context, email, password, collectionName);
@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
     String dropdownValue = '';
 
     // Determine the collection name based on the selected dropdown value
-    String collectionName = 'defaultCollection'; // Default collection name
+    String collectionName = _selectedValue; // Default collection name
 
     if (dropdownValue == 'User') {
       collectionName = 'users'; // Collection name for users
@@ -178,11 +178,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(
                       height: size.height * 0.02,
                     ),
+                    // Initialize with a default value
+
                     DropdownButtonFormField<String>(
-                      value: 'User',
+                      value: _selectedValue,
                       onChanged: (String? newValue) {
                         setState(() {
                           _selectedValue = newValue ?? 'User';
+                          _getCollectionName();
+                          // Update _selectedValue
                         });
                       },
                       items: <String>['User', 'Driver']
@@ -194,6 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                           .toList(),
                     ),
+
                     const SizedBox(height: 10.0),
                     Form(
                       key: _formKey,
