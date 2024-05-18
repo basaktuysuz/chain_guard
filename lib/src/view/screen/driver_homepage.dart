@@ -30,7 +30,7 @@ class _DriverHomePageState extends State<DriverHomePage> {
                     bottom: MediaQuery.of(context).viewInsets.bottom),
                 child: Container(
                   height: MediaQuery.of(context).size.height *
-                      0.4, // Set the height to 50% of screen height
+                      0.5, // Set the height to 50% of screen height
                   child: ResultPage(data),
                 ),
               );

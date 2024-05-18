@@ -1,4 +1,5 @@
 import 'package:chain_guard/src/view/screen/login_screen.dart';
+import 'package:chain_guard/src/view/screen/package_detail.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:realm/realm.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const LoginScreen(),
+      home: PackageDetailsPage(),
     );
   }
 }

@@ -11,92 +11,93 @@ class ResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Parse the URL to extract Box, Content, and Weight values
+    //Parsing URl here
     Map<String, String> parsedValues = parseUrl(scannedData);
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0,vertical:10.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-
-              const Text(
-                'Scanned QR Code Data:',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 20),
-              /*   Text(
-                scannedData,
-                style: TextStyle(fontSize: 18),
-              ),
-
-            */
-              Card(
-
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text(
+                  'Scanned QR Code Data:',
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green),
                 ),
-                child: Container(
-                  width: double.infinity,
-                  // Set Card width to match parent width
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
+                SizedBox(height: 20),
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    // Set Card width to match parent width
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Box size: ${parsedValues['Box']}',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
+                        Center(
+                          child: Text(
+                            'Box ID: ${parsedValues['Box ID']}',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
                         ),
-
+                        SizedBox(height: 10),
+                        Divider(),
+                        Text(
+                          'Size: ${parsedValues['Size']}',
+                          style: TextStyle(fontSize: 18),
+                        ),
                         SizedBox(height: 10),
                         Text(
                           'Content: ${parsedValues['Content']}',
                           style: TextStyle(fontSize: 18),
                         ),
                         SizedBox(height: 10),
-
                         Text(
-                          'Type: ${parsedValues['Destination']}',
+                          'Type: ${parsedValues['Type']}',
                           style: TextStyle(fontSize: 18),
                         ),
                         SizedBox(height: 10),
                         Text(
                           'Weight: ${parsedValues['Weight']}',
                           style: TextStyle(fontSize: 18),
-                        ),    SizedBox(height: 10),
-
+                        ),
                       ],
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _sendLinktoFirebase(scannedData);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white, backgroundColor: Colors.green,
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                SizedBox(height: 20),
+                Container(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _sendLinktoFirebase(scannedData);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      'Receive Box',
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
-                  child: Text(
-                    'Receive Box',
-                    style: TextStyle(fontSize: 18),
-                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -122,7 +123,8 @@ class ResultPage extends StatelessWidget {
         'Weight': parsedValues['Weight'],
       }).then((value) {
         print("Link stored successfully in user's boxes collection");
-        showToast(message: "Link stored successfully in user's boxes collection");
+        showToast(
+            message: "Link stored successfully in user's boxes collection");
       }).catchError((error) {
         print("Error occurred during data storage: $error");
       });
@@ -132,15 +134,19 @@ class ResultPage extends StatelessWidget {
   }
 
   Map<String, String> parseUrl(String url) {
-    RegExp regExp = RegExp(r"/box/(\w+)/comment/(\w+)/content/(\w+)/weight/(\d+)");
+    RegExp regExp = RegExp(
+        r"/box/id/([\w-]+)/status/(\w+)/packageSizes/([\w\d]+x[\w\d]+x[\w\d]+)/comment/(\w+)/content/(\w+)/weight/(\d+)");
+    ;
     Match? match = regExp.firstMatch(url);
 
     if (match != null) {
       return {
-        'Box': match.group(1)!,
-        'Destination': match.group(2)!,
-        'Content': match.group(3)!,
-        'Weight': match.group(4)!
+        'Box ID': match.group(1)!,
+        'Status': match.group(2)!,
+        'Size': match.group(3)!,
+        'Type': match.group(4)!,
+        'Content': match.group(5)!,
+        'Weight': match.group(6)!
       };
     } else {
       return {};

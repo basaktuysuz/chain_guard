@@ -1,13 +1,10 @@
 import 'dart:convert';
 
 import 'package:chain_guard/src/common_widgets/toast.dart';
-import 'package:chain_guard/src/db_helper/authservice.dart';
-import 'package:chain_guard/src/db_helper/constant.dart';
 import 'package:chain_guard/src/view/screen/login_screen.dart';
 import 'package:chain_guard/src/view/screen/profilepage.dart';
 import 'package:chain_guard/src/view/screen/resultpage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/widgets.dart';
@@ -25,7 +22,8 @@ class _HomePageState extends State<HomePage> {
   String fullName = 'Başak';
   String result = "";
   String data = "";
-  var token;
+
+
   List<dynamic> users = [];
   dynamic firstUser;
 
@@ -88,8 +86,7 @@ class _HomePageState extends State<HomePage> {
 
 
 
- Future<void> scanQrCode() async {
-
+Future<void> scanQrCode( BuildContext context) async {
 
    FlutterBarcodeScanner.scanBarcode("#000000", "Cancel", true, ScanMode.QR)
        .then((value) {
@@ -105,9 +102,9 @@ class _HomePageState extends State<HomePage> {
                return Padding(
                  padding: EdgeInsets.only(
                      bottom: MediaQuery.of(context).viewInsets.bottom),
-                 child: Container(
-                   height: MediaQuery.of(context).size.height * 0.4, // Set the height to 50% of screen height
-                   child: ResultPage(data),
+                 child: FractionallySizedBox(
+                   heightFactor: 0.5, // Set the height to 50% of screen height
+                   child: ResultPage(data), // Pass parsedValues to ResultPage
                  ),
                );
              },
@@ -218,19 +215,7 @@ class _HomePageState extends State<HomePage> {
                         child: ElevatedButton(
                           onPressed: () async {
 
-                           scanQrCode();
-                            /*      var res = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SimpleBarcodeScannerPage(),
-                    ));
-                setState(() {
-                  if (res is String) {
-                    result = res;
-                  }
-                });
-
-           */
+                           scanQrCode(this.context);
                           },
                           style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all(Colors.green),
@@ -257,7 +242,7 @@ class _HomePageState extends State<HomePage> {
             ),
             InkWell(
               onTap: () async {
-                scanQrCode();
+                scanQrCode(this.context);
                 /*      var res = await Navigator.push(
                     context,
                     MaterialPageRoute(
